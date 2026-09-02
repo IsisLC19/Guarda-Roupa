@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guarda-Roupa Digital</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome CDN for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- ColorThief CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-shirt text-brand-500 text-2xl animate-bounce"></i>
+        <h1 class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Guarda-Roupa <span class="text-brand-500">Digital</span></h1>
+      </div>
+      <button id="themeToggleBtn" aria-label="Alternar Tema" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none">
+        <i id="themeIcon" class="fa-solid fa-sun text-yellow-400 text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-md w-full mx-auto p-4 pb-24">
+
+    <!-- View 1: Analyzer Section -->
+    <section id="analyzerView" class="space-y-6">
+
+      <!-- Upload Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700/50 transition-all">
+        <h2 class="text-lg font-semibold mb-1 flex items-center gap-2">
+          <i class="fa-solid fa-camera text-brand-500"></i> Nova Análise
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Selecione ou tire uma foto de uma peça de roupa para analisar.</p>
+
+        <div id="dropZone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center hover:border-brand-500 dark:hover:border-brand-500 transition-colors cursor-pointer bg-gray-50/50 dark:bg-gray-900/30">
+          <input type="file" id="imageInput" accept="image/*" class="hidden">
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+          <div id="uploadPrompt" class="space-y-3">
+            <div class="w-16 h-16 mx-auto rounded-full bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-500">
+              <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+            </div>
+            <div class="text-sm">
+              <span class="font-medium text-brand-600 dark:text-brand-400">Clique para enviar</span> ou arraste a imagem
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-1">
+              <button type="button" id="openCameraBtn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                <i class="fa-solid fa-camera"></i> Usar Câmera
+              </button>
+            </div>
+            <p class="text-xs text-gray-400">PNG, JPG, WEBP até 10MB</p>
+          </div>
+          <!-- Image Preview -->
+          <div id="previewContainer" class="hidden relative group">
+            <img id="imagePreview" class="max-h-64 mx-auto rounded-lg object-contain shadow-md" alt="Pré-visualização da roupa">
+            <button id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-all">
+              <i class="fa-solid fa-xmark text-xs w-4 h-4 flex items-center justify-center"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inputs / Controls after upload -->
+        <div id="analyzeControls" class="mt-4 space-y-4 hidden">
+          <div>
+            <label for="pieceCategorySelect" class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Tipo da Peça</label>
+            <select id="pieceCategorySelect" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="camiseta">Camiseta / Blusa</option>
+              <option value="camisa">Camisa Social / Botão</option>
+              <option value="calca">Calça</option>
+              <option value="bermuda">Bermuda / Shorts</option>
+              <option value="jaqueta">Jaqueta / Casaco</option>
+              <option value="vestido">Vestido / Macacão</option>
+              <option value="sapato">Calçado / Tênis</option>
+              <option value="acessorio">Acessório</option>
+            </select>
+          </div>
+
+          <button id="analyzeBtn" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-98 text-white font-semibold py-3 px-4 rounded-xl shadow-md flex items-center justify-center space-x-2 transition-all">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Analisar Peça</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Analysis Results Card (Hidden by default) -->
+      <div id="analysisResults" class="hidden bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700/50 space-y-6">
+
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+          <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-brand-500"></i> Resultado da Análise
+          </h3>
+          <span id="analysisTimestamp" class="text-xs text-gray-400">Agora</span>
+        </div>
+
+        <!-- Color & Dominant Palettes -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cores Identificadas</h4>
+          <div class="flex items-center gap-3">
+            <div id="dominantColorBox" class="w-12 h-12 rounded-xl shadow-inner border border-gray-300 dark:border-gray-600"></div>
+            <div>
+              <div id="dominantColorName" class="font-bold text-base">Azul</div>
+              <div id="dominantColorHex" class="text-xs text-gray-400 font-mono">#000000</div>
+            </div>
+          </div>
+
+          <!-- Color Theory Harmonies -->
+          <div class="mt-2">
+            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Paleta Harmônica (Harmonia Complementar e Análoga):</span>
+            <div id="harmonyPalette" class="flex gap-2">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Porcentagem de Combinação do Look</h4>
+          <div class="relative w-48 h-48 mx-auto">
+            <canvas id="matchChart"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span id="matchPercentageScore" class="text-3xl font-extrabold text-brand-500">85%</span>
+              <span id="matchPercentageLabel" class="text-xs text-gray-400 font-medium">Harmonia</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips and Recommendations -->
+        <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700/50">
+          <h4 class="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb"></i> Dicas de Combinação
+          </h4>
+          <ul id="combinationTips" class="text-xs space-y-2 text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <!-- Save Piece Button -->
+        <button id="savePieceBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-semibold py-3 px-4 rounded-xl shadow-md flex items-center justify-center space-x-2 transition-all">
+          <i class="fa-solid fa-bookmark"></i>
+          <span>Guardar Peça no Guarda-Roupa</span>
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- View 2: Wardrobe Collection Section (Hidden initially or tabbed) -->
+    <section id="wardrobeView" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Meu Guarda-Roupa</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Peças salvas e guardadas para combinações</p>
+        </div>
+        <span id="savedCountBadge" class="bg-brand-500/10 text-brand-500 font-semibold px-2.5 py-1 rounded-full text-xs">0 Peças</span>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-none text-xs" id="categoryFilterContainer">
+        <button data-filter="all" class="filter-btn active bg-brand-500 text-white px-3 py-1.5 rounded-lg whitespace-nowrap">Todas</button>
+        <button data-filter="top" class="filter-btn bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg whitespace-nowrap">Superiores</button>
+        <button data-filter="bottom" class="filter-btn bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg whitespace-nowrap">Inferiores</button>
+        <button data-filter="shoes" class="filter-btn bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg whitespace-nowrap">Calçados</button>
+        <button data-filter="outerwear" class="filter-btn bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg whitespace-nowrap">Casacos</button>
+      </div>
+
+      <!-- Wardrobe Grid -->
+      <div id="wardrobeGrid" class="grid grid-cols-2 gap-3">
+        <!-- Dynamically populated or empty state -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyWardrobeState" class="text-center py-12 space-y-3 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-6">
+        <i class="fa-solid fa-box-open text-4xl text-gray-400"></i>
+        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Nenhuma peça guardada ainda.</p>
+        <p class="text-xs text-gray-400">Análise e salve peças para que elas apareçam no seu guarda-roupa digital.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Mobile Friendly) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-800">
+    <div class="max-w-md mx-auto flex justify-around py-2">
+      <button id="navAnalyzerBtn" class="nav-btn active flex flex-col items-center text-brand-500 py-1 px-4 transition-colors">
+        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">Analisar</span>
+      </button>
+      <button id="navWardrobeBtn" class="nav-btn flex flex-col items-center text-gray-400 hover:text-brand-500 py-1 px-4 transition-colors">
+        <i class="fa-solid fa-vault text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">Guarda-Roupa</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Detail Modal -->
+  <div id="pieceModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden transition-opacity">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-sm w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl relative border border-gray-100 dark:border-gray-700">
+      <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div id="modalColorBox" class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+        <div>
+          <h3 id="modalPieceTitle" class="font-bold text-gray-900 dark:text-white text-base">Camiseta</h3>
+          <span id="modalPieceColor" class="text-xs text-gray-500 dark:text-gray-400 font-medium">Azul</span>
+        </div>
+      </div>
+
+      <img id="modalPieceImg" class="w-full h-48 object-contain rounded-xl bg-gray-50 dark:bg-gray-900/50 p-2 border border-gray-100 dark:border-gray-700" alt="Peça">
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-semibold text-brand-500 uppercase tracking-wider">Dicas de Combinação</h4>
+        <ul id="modalPieceTips" class="text-xs text-gray-600 dark:text-gray-300 space-y-1.5 list-disc list-inside"></ul>
+      </div>
+
+      <div class="pt-2">
+        <button id="modalDeleteBtn" class="w-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-100 dark:hover:bg-red-900/50 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+          <i class="fa-solid fa-trash"></i>
+          <span>Excluir do Guarda-Roupa</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold opacity-0 transition-opacity duration-300 pointer-events-none flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toastMessage">Ação realizada!</span>
+  </div>
+
+  <!-- Custom JS Application -->
+  <script src="js/app.js"></script>
+</body>
+</html>
